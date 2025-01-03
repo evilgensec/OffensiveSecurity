@@ -55,4 +55,18 @@ Session completed.
 
 -- USER FLAG OBTAINED --
 
+-- PRIVILEGE ESCALATION --
 
+Executed Linpeas on the system and found that a monitoring website is being hosted on localhost:8080
+
+Fowarding the port on local machine 
+
+Command: ssh -L 8080:127.0.0.1:8080 albert@alert.htb
+
+Found a directory with root permission where files can be written by other users.
+
+Uploaded p0wny-shell
+
+URL: https://github.com/flozz/p0wny-shell/blob/master/shell.php   
+
+-- ROOT FLAG OBTAINED --
